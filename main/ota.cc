@@ -75,7 +75,7 @@ esp_err_t Ota::CheckVersion() {
     auto& board = Board::GetInstance();
     auto app_desc = esp_app_get_description();
 
-    // Check if there is a new firmware version available
+// Check if there is a new firmware version available
     current_version_ = app_desc->version;
     ESP_LOGI(TAG, "Current version: %s", current_version_.c_str());
 
@@ -87,7 +87,12 @@ esp_err_t Ota::CheckVersion() {
 
     auto http = SetupHttp();
 
+    // Print MAC address
+    std::string mac = SystemInfo::GetMacAddress().c_str();
+    ESP_LOGI(TAG, "MAC Address: %s", mac.c_str());
     std::string data = board.GetSystemInfoJson();
+    ESP_LOGI(TAG, "GetSystemInfoJson: %s", data.c_str());
+    
     std::string method = data.length() > 0 ? "POST" : "GET";
     http->SetContent(std::move(data));
 
@@ -96,7 +101,6 @@ esp_err_t Ota::CheckVersion() {
         ESP_LOGE(TAG, "Failed to open HTTP connection, code=0x%x", last_error);
         return last_error;
     }
-
     auto status_code = http->GetStatusCode();
     if (status_code != 200) {
         ESP_LOGE(TAG, "Failed to check version, status code: %d", status_code);
